@@ -8,9 +8,9 @@
 #include <sched.h>
 
 int main() {
-    pid_t childpid;   
-    int status; 
-    
+    pid_t childpid;
+    int status;
+
     childpid = fork();
 
     if (childpid >= 0) {
@@ -20,33 +20,49 @@ int main() {
             printf("CHILD: Here's my PID: %d\n", getpid());
             printf("CHILD: My parent's PID is: %d\n", getppid());
             printf("CHILD: The value of my copy of childpid is: %d\n", childpid);
-            
+
             printf("CHILD : Scheduler before change: %d\n", sched_getscheduler(0));
             sp.sched_priority = sched_get_priority_max(SCHED_FIFO);
-            sched_setscheduler(0, SCHED_FIFO, &sp);
+            sched_setscheduler(0, SCHED_OTHER, &sp);
+            setpriority(PRIO_PROCESS, 0, 19);
             printf("CHILD : Scheduler after change: %d\n", sched_getscheduler(0));
-            
+
+            printf("exec");
+            char *args[] = {"pmidi", "-p", "128:0", "/home/lbillon/Downloads/jbg.mid", NULL};
+            execv("/usr/bin/pmidi", args);
+            printf("rexec");
+
             int i;
             for (i = 0; i <= 20; i++) {
                 printf("CHILD: Sleeping for 1 second...\n");
                 sleep(1);
             }
-           
+
             printf("CHILD: Goodbye!\n");
-            
-            exit(0); 
+
+            exit(0);
         } else {
             printf("PARENT: I am the parent process!\n");
             printf("PARENT: Here's my PID: %d\n", getpid());
             printf("PARENT: The value of my copy of childpid is %d\n", childpid);
             printf("PARENT: I will now wait for my child to exit.\n");
-                    wait(&status);
-                    printf("PARENT: Child's exit code is: %d\n", WEXITSTATUS(status));
-                    printf("PARENT: Goodbye!\n");
-                    exit(0); 
+            
+            
+            sleep(3);
+//            printf("PARENT: STOP.\n");
+//            kill(childpid,SIGSTOP);
+            int i;
+            while(1){
+                i=i+1;
+            }
+            
+            wait(&status);
+            printf("PARENT: Child's exit code is: %d\n", WEXITSTATUS(status));
+            printf("PARENT: Goodbye!\n");
+            exit(0);
         }
     } else {
-        perror("fork"); 
-                exit(0);
+        perror("fork");
+        exit(0);
     }
 }
