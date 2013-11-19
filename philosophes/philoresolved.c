@@ -45,32 +45,50 @@ void* activite_philo(void* arg)
 		if(left == 0)
 		{
 			printf("%d: je veux ma fourchette gauche: %d\n",philoPos,gauche);
-			pthread_mutex_lock(&fourchettes[gauche]);
-			left = 1;
-			printf("%d: j'ai ma fourchette gauche: %d\n",philoPos,gauche);
-			sleep(3);
+			int try = pthread_mutex_trylock(&fourchettes[gauche]);
+			if(try != 0)
+			{
+				if (right == 1)
+				{
+					pthread_mutex_unlock(&fourchettes[droite]);
+					right = 0;
+					printf("%d: j'ai laché ma fourchette droite parce que l'autre était prise: %d\n",philoPos, droite);
+					sleep(3);
+				}
+			}
+			else
+			{			
+				left = 1;
+				printf("%d: j'ai ma fourchette gauche: %d\n",philoPos,gauche);
+				sleep(3);
+			}
 		}
-		// Si droite et gauche avec couverts alors miam puis dodo
-		printf("%d: j'ai mes deux fourchettes! miam!\n",philoPos);
-		sleep(5);
+
+		if ((left ==1) && (right == 1))
+		{
+			// Si droite et gauche avec couverts alors miam puis dodo
+			printf("%d: j'ai mes deux fourchettes! miam!\n",philoPos);
+			sleep(5);
 		
-		// puis je lache mes fourchettes
-		printf("%d: je lache ma fourchette droite: %d\n",philoPos,droite);
-		pthread_mutex_unlock(&fourchettes[droite]);
-		right = 0;
-		printf("%d: j'ai lache' ma fourchette droite: %d\n",philoPos, droite);
-		sleep(3);
+			// puis je lache mes fourchettes
+			printf("%d: je lache ma fourchette droite: %d\n",philoPos,droite);
+			pthread_mutex_unlock(&fourchettes[droite]);
+			right = 0;
+			printf("%d: j'ai lache' ma fourchette droite: %d\n",philoPos, droite);
+			sleep(3);
 	
 
-		printf("%d: je lache ma fourchette gauche: %d\n",philoPos,gauche);	
-		pthread_mutex_unlock(&fourchettes[gauche]);
-		left = 0;
-		printf("%d: j'ai lache' ma fourchette droite: %d\n",philoPos, gauche);
-		sleep(3);
+			printf("%d: je lache ma fourchette gauche: %d\n",philoPos,gauche);	
+			pthread_mutex_unlock(&fourchettes[gauche]);
+			left = 0;
+			printf("%d: j'ai lache' ma fourchette droite: %d\n",philoPos, gauche);
+			sleep(3);
+		}
 	}
 
 	return NULL ; // dummy
 }
+
 
 
 int main()
