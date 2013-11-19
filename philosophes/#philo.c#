@@ -1,0 +1,89 @@
+/* Includes */
+#include <unistd.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <stdio.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <sched.h>
+#include <pthread.h>
+
+
+struct pthTable
+{
+	pthread_t id;
+	int pthread_num;
+	int right;
+	int left;
+}
+struct couverts
+{
+	pthread_mutex_t fourchette;
+	int mutex_num;
+}
+
+
+
+
+
+void* activite_philo(void* arg)
+{
+struct pthTable* localInfo = arg;
+int philoPos = localInfo->pthread_num;	
+	
+ if(localInfo->right == 0)
+	{	
+		if (philoPos == 1)
+		{
+			pthread_mutex_lock(*tiroir[5]);
+		}
+		else{
+			pthread_mutex_lock(*tiroir[philoPos-1]);
+		}
+	}
+	if(localInfo->left == 0)
+	{
+		pthread_mutex_lock(*tiroir[philoPos]);
+	}
+
+	
+	// Si droite et gauche avec couverts alors dodo quelque temps puis unlock dabord gauche et puis droite
+	
+
+
+}
+
+
+int main()
+{
+struct pthTable* tInfo;	
+struct couverts* tiroir;
+
+	//allocating memory
+	tInfo = malloc(5, sizeof(struct pthTable));
+	tiroir = malloc(5, sizeof(struct couverts));
+	
+	for(i=0;i<5;i++)
+	{
+		//initializing threads
+		tInfo[i].pthread_num = i+1;
+		int terror = pthread_create(&tInfo[i].thread_id, NULL,&activite_philo, &tInfo[i]);
+		if (terror != 0)
+		{
+			printf ("thread create error %d", tInfo[i].pthread_num);
+		}
+		tInfo[i].right = 0;
+		tInfo[i].left = 0;
+
+		//initializing mutexes		
+		tiroir[i].mutex_num = i+1;		
+		int merror = pthread_mutex_init(&tiroir[i],NULL);
+		if(merror != 0)
+		{
+			printf("mutex init error %d", tiroir[i].mutex_num);
+		}
+	}
+
+
+	
+}
