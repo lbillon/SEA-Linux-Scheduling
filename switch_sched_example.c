@@ -21,9 +21,10 @@ static void *task_b (void *p_data)
 }
 
 int main() {
+   puts ("Hello world");
     // Define threads
-    pthread_t high_prio;
-    pthread_t low_prio;
+    pthread_t ta;
+    pthread_t tb;
     
     // Threads Attributes
     pthread_attr_t high_prio_thread;
