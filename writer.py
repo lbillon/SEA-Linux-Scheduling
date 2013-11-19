@@ -11,4 +11,4 @@ f.close()
 endt=time.time()
 
 logf = open('writer.log','a')
-logf.write('Start time : %s, end time : %s, difference : %s\n'%(startt,endt,endt-startt))
+logf.write('Start time : %s, end time : %s, running time : %s\n'%(startt,endt,endt-startt))

@@ -4,6 +4,9 @@ import subprocess
 import os
 from time import sleep
 
+def wk():
+	raw_input("-")
+
 print "Starting processes"
 with open(os.devnull, 'w') as devnull:
 	timidity_process = subprocess.Popen(['timidity', '/home/pi/jbg.mid'],stdout=devnull)
@@ -11,7 +14,7 @@ print "Timidity has pid %s"%timidity_process.pid
 print "Setting Timidity priority to 19"
 with open(os.devnull, 'w') as devnull:
         subprocess.call('renice -n 19 %s'%timidity_process.pid, shell=True,stdout=devnull)
-sleep(5)
+wk()
 print "Running writer process with priority -15"
 with open(os.devnull, 'w') as devnull:
 	writer_process = subprocess.Popen(['./writer.py'],stdout=devnull)
