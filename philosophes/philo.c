@@ -9,105 +9,99 @@
 #include <pthread.h>
 
 
-struct pthTable
-{
-	pthread_t id;
-	int pthread_num;
-	int right;
-	int left;
-};
-struct couverts
-{
-	pthread_mutex_t fourchette;
-	int mutex_num;
-};
+pthread_mutex_t *fourchettes;
+pthread_t *philosophes;
 
-
-struct pthTable* tInfo;	
-struct couverts* tiroir;
-
+int nombre_philosophes;
 
 void* activite_philo(void* arg)
 {
-struct pthTable* localInfo = arg;
-int philoPos = localInfo->pthread_num;	
-printf("j'ai la position %d\n",philoPos);
-	if(localInfo->right == 0)
-	{	
-		
-		if (philoPos == 1)
-		{
-			pthread_mutex_lock(&(tiroir[4].fourchette));
-			localInfo->right = 1;
-			printf("j'ai la fourchette de droite et je suis %d\n",philoPos);
-			sleep(3);
-		}
-		else{
-			pthread_mutex_lock(&(tiroir[philoPos-1].fourchette));
-			localInfo->right = 1;
-			printf("j'ai la fourchette de droite et je suis %d\n",philoPos);
-			sleep(3);
-		}
-	}
-	if(localInfo->left == 0)
+
+	int right=0;
+	int left=0;
+
+
+	int philoPos = (int)(long int)arg;
+
+	int gauche = philoPos;
+	int droite = philoPos - 1;
+	if(droite == -1)
 	{
-		pthread_mutex_lock(&(tiroir[philoPos].fourchette));
-		localInfo->left = 1;
-		printf("j'ai la fourchette de gauche et je suis %d\n",philoPos);
+		droite = nombre_philosophes-1;
+	}
+
+	while(1)
+	{
+		// printf("%d: j'ai faim\n",philoPos);
+		if(right == 0)
+		{	
+
+			printf("%d: je veux ma fourchette droite: %d\n",philoPos,droite);
+			pthread_mutex_lock(&fourchettes[droite]);	
+			right = 1;	
+			printf("%d: j'ai ma fourchette droite: %d\n",philoPos, droite);
+			sleep(3);
+		}
+		if(left == 0)
+		{
+			printf("%d: je veux ma fourchette gauche: %d\n",philoPos,gauche);
+			pthread_mutex_lock(&fourchettes[gauche]);
+			left = 1;
+			printf("%d: j'ai ma fourchette gauche: %d\n",philoPos,gauche);
+			sleep(3);
+		}
+		// Si droite et gauche avec couverts alors miam puis dodo
+		printf("%d: j'ai mes deux fourchettes! miam!\n",philoPos);
+		sleep(5);
+		
+		// puis je lache mes fourchettes
+		printf("%d: je lache ma fourchette droite: %d\n",philoPos,droite);
+		pthread_mutex_unlock(&fourchettes[droite]);
+		right = 0;
+		printf("%d: j'ai lache' ma fourchette droite: %d\n",philoPos, droite);
+		sleep(3);
+	
+
+		printf("%d: je lache ma fourchette gauche: %d\n",philoPos,gauche);	
+		pthread_mutex_unlock(&fourchettes[gauche]);
+		left = 0;
+		printf("%d: j'ai lache' ma fourchette droite: %d\n",philoPos, gauche);
 		sleep(3);
 	}
-	// Si droite et gauche avec couverts alors dodo
-	printf("j'ai mes deux fourchettes! miam! je suis %d\n",philoPos);
-	sleep(5);
-	
-	//unlock dabord gauche et puis droite
-	pthread_mutex_unlock(&(tiroir[philoPos].fourchette));
-	localInfo->left = 0;
-	printf("je lache la fourchette de gauche et je suis %d\n",philoPos);
-	if (philoPos == 1)
-		{
-			pthread_mutex_unlock(&(tiroir[5].fourchette));
-			localInfo->right = 0;
-			printf("je lache la fourchette de droite et je suis %d\n",philoPos);
-			sleep(3);
-		}
-		else{
-			pthread_mutex_unlock(&(tiroir[philoPos-1].fourchette));
-			localInfo->right = 0;
-			printf("je lache la fourchette de droite et je suis %d\n",philoPos);
-			sleep(3);
-		}
+
+	return NULL ; // dummy
 }
 
 
 int main()
 {
-
+	nombre_philosophes = 5;
 
 	//allocating memory
-	tInfo = calloc(5, sizeof(struct pthTable));
-	tiroir = calloc(5, sizeof(struct couverts));
+	philosophes = calloc(5, sizeof(pthread_t));
+	fourchettes = calloc(5,sizeof(pthread_mutex_t));
+
 	int i;
 	for(i=0;i<5;i++)
 	{
-		//initializing threads
-		tInfo[i].pthread_num = i+1;
-		printf("num: %d\n",tInfo[i].pthread_num);
-		int terror = pthread_create(&tInfo[i].id, NULL,activite_philo, &tInfo[i]);
-		if (terror != 0)
-		{
-			printf ("thread create error %d\n", tInfo[i].pthread_num);
-		}
-		tInfo[i].right = 0;
-		tInfo[i].left = 0;
-
 		//initializing mutexes		
-		tiroir[i].mutex_num = i+1;		
-		int merror = pthread_mutex_init(&(tiroir[i].fourchette),NULL);
+		int merror = pthread_mutex_init(&fourchettes[i],NULL);
 		if(merror != 0)
 		{
-			printf("mutex init error %d\n", tiroir[i].mutex_num);
+			printf("mutex init error %d\n", i);
 		}
+	}
+
+	for(i=0;i<5;i++)
+	{
+		//initializing threads
+		int terror = pthread_create(&philosophes[i], NULL,activite_philo, (void*)(long int)i);
+		if (terror != 0)
+		{
+			printf ("thread create error %d\n", i);
+		}
+
+		
 	}
 
 
