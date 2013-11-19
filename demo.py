@@ -47,4 +47,5 @@ print "Changing scheduling policy for Timidity to SCHED_RR"
 with open(os.devnull, 'w') as devnull:
         subprocess.call('sudo chrt -r -p %s %s'%(1,timidity_process.pid), shell=True,stdout=devnull)
 
+
 sleep(10000)

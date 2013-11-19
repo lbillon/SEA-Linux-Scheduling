@@ -14,3 +14,6 @@
 
 #Executables
 *.bin
+
+# Log Files
+*.log
