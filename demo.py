@@ -17,6 +17,19 @@ def test2():
 	        subprocess.call('renice -n 0 %s'%timidity_process.pid, shell=True,stdout=devnull)
 	sleep(5)
 
+	print "Slowly decreasing Blink niceness to -5"
+	for i in range(0,-5,-1):
+	        with open(os.devnull, 'w') as devnull:
+	                subprocess.call('renice -n %s %s'%(i,blink_process.pid), shell=True,stdout=devnull)
+	        print "Priority is now %s"%i
+	        sleep(3)
+	print "Sound should be awful"
+	sleep(5)
+	print "Setting blink niceness to -20"
+	with open(os.devnull, 'w') as devnull:
+	        subprocess.call('renice -n %s %s'%(-20,blink_process.pid), shell=True,stdout=devnull)
+	print "LED should blink super fast"
+	sleep(5)
 
 print "Starting processes"
 with open(os.devnull, 'w') as devnull:
@@ -28,15 +41,8 @@ print "Blink process has pid %s"%blink_process.pid
 sleep(10)
 print "Sound should work nicely"
 
-#test2()
+test2()
 
-print "Slowly decreasing Blink niceness to -5"
-for i in range(0,-5,-1):
-        with open(os.devnull, 'w') as devnull:
-                subprocess.call('renice -n %s %s'%(i,blink_process.pid), shell=True,stdout=devnull)
-        print "Priority is now %s"%i
-        sleep(3)
-sleep(5)
 print "Changing scheduling policy for Timidity to SCHED_RR"
 with open(os.devnull, 'w') as devnull:
         subprocess.call('sudo chrt -r -p %s %s'%(1,timidity_process.pid), shell=True,stdout=devnull)
