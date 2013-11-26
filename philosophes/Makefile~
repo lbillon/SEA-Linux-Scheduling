@@ -1,3 +1,0 @@
-all:
-
-	gcc philo.c -o -lpthread philo.bin
